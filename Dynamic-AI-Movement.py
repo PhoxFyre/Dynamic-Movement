@@ -12,3 +12,4 @@ from pathlib import Path
 
 # debug statement to verify file works
 print ("Hello World!")
+print("Nice to meet you!")
