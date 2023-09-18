@@ -1,4 +1,5 @@
 # --------------- Main Entry Begins Below -------------
+from asyncio.windows_events import NULL
 from math import pi
 import math
 import os
@@ -6,11 +7,12 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
+# this class is likely unneeded.
 class Dynamic:
     print ("hello world") # TODO: figure out dynamic class
 
 # Definition of a vector
-class Vector:
+class vector:
     # put function definitions here
     # two variables go here
     accel_x=0
@@ -18,7 +20,7 @@ class Vector:
     vector2D=np.array([accel_x, accel_z])
 
 # Generic character definition
-class Character0:
+class character0:
     char_id=0
     steering_behavior_code=0 
     #position=[0,0]
@@ -39,62 +41,62 @@ class Character0:
     collision_status=False
 
 # Init the characters with their member variables
-Character1 = Character0() # Character 1 is the target character
-Character2 = Character0() # Character 2 flees from Character 1
-Character3 = Character0() # Character 3 seeks Character 1
-Character4 = Character0() # Character 4 arrives to character 1
+character1 = character0() # Character 1 is the target character
+character2 = character0() # Character 2 flees from Character 1
+character3 = character0() # Character 3 seeks Character 1
+character4 = character0() # Character 4 arrives to character 1
 
 # Create character list for printing to file
-charList=[Character1, Character2, Character3, Character4]
+charList=[character1, character2, character3, character4]
 
 # Set the character steering behaviors
-Character1.steering_behavior_code=1 # continue
-Character2.steering_behavior_code=7 # flee
-Character3.steering_behavior_code=3 # seek
-Character4.steering_behavior_code=8 # arrive
+character1.steering_behavior_code=1 # Continue
+character2.steering_behavior_code=7 # Flee
+character3.steering_behavior_code=3 # Seek
+character4.steering_behavior_code=8 # Arrive
 
 # Set characters variables
 # Character 1 init
-Character1.postion_x=0
-Character1.position_z=0
-Character1.velocity_x=0
-Character1.velocity_z=0
-Character1.linear_x=0
-Character1.linear_z=0
-Character1.orientation=0
-Character1.collision_status=False
+character1.postion_x=0
+character1.position_z=0
+character1.velocity_x=0
+character1.velocity_z=0
+character1.linear_x=0
+character1.linear_z=0
+character1.orientation=0
+character1.collision_status=False
 
 # Character 2 init
-Character2.position=np.array([-30,-50])
-Character2.velocity=np.array([2,7])
-Character2.orientation=pi/4
-Character2.max_velocity=8
-Character2.max_acceleration=1.5
-Character2.target=1
+character2.position=np.array([-30,-50])
+character2.velocity=np.array([2,7])
+character2.orientation=pi/4
+character2.max_velocity=8
+character2.max_acceleration=1.5
+character2.target=1
 
 # Character 3 init
-Character3.position=np.array([-50,40])
-Character3.velocity=np.array([0,8])
-Character3.orientation=3*pi/2
-Character3.max_velocity=8
-Character3.max_acceleration=2
-Character3.target=1
+character3.position=np.array([-50,40])
+character3.velocity=np.array([0,8])
+character3.orientation=3*pi/2
+character3.max_velocity=8
+character3.max_acceleration=2
+character3.target=1
 
 # Character 4 init
-Character4.position=np.array([-50,40])
-Character4.velocity=np.array([0,8])
-Character4.orientation=3*pi/2
-Character4.max_velocity=8
-Character4.max_acceleration=2
-Character4.target=1
+character4.position=np.array([-50,40])
+character4.velocity=np.array([0,8])
+character4.orientation=3*pi/2
+character4.max_velocity=8
+character4.max_acceleration=2
+character4.target=1
 
 # Steering Output
-class SteeringOutput:
-    linear: Vector   # linear acceleration, 2D vector # linear is variable, vector is type
-    angular: float   # angular acceleration, scalar
+class steeringOutput:
+    linear: vector   # Linear acceleration, 2D vector # linear is variable, vector is type
+    angular: float   # Angular acceleration, scalar
 
 # Movement Update
-def update(steering: SteeringOutput, maxSpeed: float, time: float):
+def update(steering: steeringOutput, maxSpeed: float, time: float):
     # Update the position and orientation
     position += velocity * time
     orientation += rotation * time
@@ -108,32 +110,105 @@ def update(steering: SteeringOutput, maxSpeed: float, time: float):
         velocity.normalize()
         velocity *= maxSpeed
 
+    
+# Dynamic Flee
+class flee:
+    character: character2   # Position and orientation for character
+    target: character1      # Position and orientation for target
+    maxAcceleration: float  # Maximum acceleration rate for character
+    
+    def getsteering() -> steeringOutput():
+        # Create output structure
+        result = steeringOutput()
+    
+        # Get the direction to the target
+        result.linear = character.position = target.position
+    
+        # Accelerate at maximum rate
+        result.linear.normalize()
+        result.linear *= character.maxAcceleration
+    
+        # Output steering
+        result.angular = 0
+        return result
+
 # Dynamic Seek
-class Seek:
-    character: Dynamic          # position and orientation for character
-    target: Dynamic             # position and orientation for target
-    max_acceleration: float     # maximum acceleration rate for character
+class seek:
+    character: character3           # Position and orientation for character
+    target: character1              # Position and orientation for target
+    maxAcceleration: float          # Maximum acceleration rate for character
     
     
-    def getSteering() -> SteeringOutput():
+    def getSteering() -> steeringOutput():
         # Create output strcuture
-        result = SteeringOutput()
+        result = steeringOutput()
  
         # Get the direction to the target
-        result.linear = Character1.position - Character0.position # TODO
+        result.linear = target.position - character.position 
  
         # Accelerate at maximum rate
         result.linear.normalize()
-        result.linear *= max_acceleration
+        result.linear *= character.maxAcceleration
         
         # Output steering
         result.angular = 0
         return result
     
-class Continue():
+
+# Dynamic Arrive
+class arrive:
+    character: character4   # Position and orientation for character
+    target: character1      # Position and orientation for target
+    
+    maxAcceleration: float  
+    maxSpeed: float         
+    
+    targetRadius: float         # Arrival radius
+    slowRadius: float           # Slowing-down radius
+    timeToTarget: float = 0.1   # Time over which to achieve target speed
+    
+    def getSteering() -> steeringOutput:
+        result = steeringOutput()
+        
+        # Get the direction and distance to the target
+        direction = target.position - character.position
+        distance = direction.length()
+        
+        # Test for arrival
+        if distance < targetRadius:
+            return NULL
+        
+        # Outside slowing-down (outer) radius, move at max speed
+        if distance > slowRadius:
+            targetSpeed = maxSpeed
+        
+        # Between radii, scale speed to slow down
+        else:
+            targetSpeed = maxSpeed * distance / slowRadius
+            
+        # Target velocity combines speed and direction
+        targetVelocity = direction
+        targetVelocity.normalize()
+        targetVelocity *= targetSpeed
+        
+        # Accelerate to target velocity
+        result.linear = targetVelocity - character.velocity
+        result.linear /= timeToTarget
+
+        # Test for too fast acceleration
+        if result.linear.length() > character.maxAcceleration:
+            result.linear.normalize()
+            result.linear *= character.maxAcceleration
+        
+        # Output steering
+        result.angular = 0
+        return result
+        
+
+class kontinue:
     def getSteering():
-        result = SteeringOutput()
-        result.linear = Character1.position
+        result = steeringOutput()
+        result.linear = character1.position
 
 # ------------ Output to .txt file -------------------
 # Find user home directory and use relative path to place output in downloads folder
@@ -154,9 +229,9 @@ while (time < end_time):
         for character in charList:
             if character.steering_behavior_code == 1:
                 #file.write("hi\n")
-                file.write(str(time) + ',' + str(Character1.char_id) + ',' +
-                   str(Character1.position_x) + ',' + str(Character1.position_z) + ',' +
-                   str(Character1.velocity_x) + ',' + str(Character1.velocity_z) + ',' + 
-                   str(Character1.linear_x) + ',' + str(Character1.linear_z) + ',' +
-                   str(Character1.orientation) + ',' + str(Character1.steering_behavior_code) + ',' + 
-                   str(Character1.collision_status) + ',')
+                file.write(str(time) + ',' + str(character1.char_id) + ',' +
+                   str(character1.position_x) + ',' + str(character1.position_z) + ',' +
+                   str(character1.velocity_x) + ',' + str(character1.velocity_z) + ',' + 
+                   str(character1.linear_x) + ',' + str(character1.linear_z) + ',' +
+                   str(character1.orientation) + ',' + str(character1.steering_behavior_code) + ',' + 
+                   str(character.collision_status) + ',')
