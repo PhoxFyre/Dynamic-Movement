@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 class Dynamic:
     print ("hello world") # TODO: figure out dynamic class
 
+# Definition of a vector
 class Vector:
     # put function definitions here
     # two variables go here
@@ -16,6 +17,7 @@ class Vector:
     accel_z=0
     vector2D=np.array([accel_x, accel_z])
 
+# Generic character definition
 class Character0:
     char_id=0
     steering_behavior_code=0 
@@ -38,9 +40,9 @@ class Character0:
 
 # Init the characters with their member variables
 Character1 = Character0() # Character 1 is the target character
-Character2 = Character0()
-Character3 = Character0()
-Character4 = Character0()
+Character2 = Character0() # Character 2 flees from Character 1
+Character3 = Character0() # Character 3 seeks Character 1
+Character4 = Character0() # Character 4 arrives to character 1
 
 # Create character list for printing to file
 charList=[Character1, Character2, Character3, Character4]
@@ -86,45 +88,45 @@ Character4.max_velocity=8
 Character4.max_acceleration=2
 Character4.target=1
 
-#Steering Output
+# Steering Output
 class SteeringOutput:
-    linear: Vector #linear acceleration, 2D vector # linear is variable, vector is type
-    angular: float   #angular acceleration, scalar
+    linear: Vector   # linear acceleration, 2D vector # linear is variable, vector is type
+    angular: float   # angular acceleration, scalar
 
-#Movement Update
+# Movement Update
 def update(steering: SteeringOutput, maxSpeed: float, time: float):
-    #Update the position and orientation
+    # Update the position and orientation
     position += velocity * time
     orientation += rotation * time
  
-    #Update the velocity and rotation
+    # Update the velocity and rotation
     velocity += steering.linear * time
     rotation += steering.angular * time
  
-    #Check for speed above max and clip
+    # Check for speed above max and clip
     if velocity.length() > maxSpeed:
         velocity.normalize()
         velocity *= maxSpeed
 
-#Dynamic Seek
+# Dynamic Seek
 class Seek:
-    character: Dynamic    #position and orientation for character
-    target: Dynamic      #position and orientation for target
-    max_acceleration: float  #maximum acceleration rate for character
+    character: Dynamic          # position and orientation for character
+    target: Dynamic             # position and orientation for target
+    max_acceleration: float     # maximum acceleration rate for character
     
     
     def getSteering() -> SteeringOutput():
-        #Create output strcuture
+        # Create output strcuture
         result = SteeringOutput()
  
-        #Get the direction to the target
+        # Get the direction to the target
         result.linear = Character1.position - Character0.position # TODO
  
-        #Accelerate at maximum rate
+        # Accelerate at maximum rate
         result.linear.normalize()
         result.linear *= max_acceleration
         
-        #Output steering
+        # Output steering
         result.angular = 0
         return result
     
@@ -138,10 +140,12 @@ class Continue():
 usr_home_dir=os.path.expanduser("~")
 output_path_file=os.path.join(usr_home_dir, "Downloads", "TestOutput.txt")
 
+# Definition of starting time, ending time, and the step between each time
 time=0
 end_time=50
 timestep=0.5
 
+# Writes the data from each character with each time step
 while (time < end_time):
     with open(output_path_file, "a") as file:
         time = timestep + time
