@@ -23,10 +23,10 @@ class vector:
 class character0:
     char_id=0
     steering_behavior_code=0 
-    #position=[0,0]
+    position=[0,0]
     position_x=0
     position_z=0   
-    #velocity=[0,0]
+    velocity=np.array([0,0])
     velocity_x=0
     velocity_z=0
     linear_x=0
@@ -34,10 +34,11 @@ class character0:
     orientation=0 #in radians
     max_velocity=0
     max_acceleration=0
-    target=0
+    target=1
     arrival_radius=0
     slowing_radius=0
     time=0.0
+    rotation=0
     collision_status=False
 
 # Init the characters with their member variables
@@ -58,7 +59,7 @@ character4.steering_behavior_code=8 # Arrive
 # Set characters variables
 # Character 1 init
 character1.char_id = 2601
-character1.position = np.array([0,0])
+character1.position = [0,0]
 character1.velocity = np.array([0,0])
 
 # Character 2 init
@@ -93,16 +94,18 @@ character4.timeToTarget = 1
 
 # Steering Output
 class steeringOutput:
+    #linear=np.array([0,0])
     linear: vector   # Linear acceleration, 2D vector # linear is variable, vector is type
     angular: float   # Angular acceleration, scalar
+    
 # Movement Update
 def update(steering: steeringOutput, maxSpeed: float, time: float):
     # Update the position and orientation
-    position += velocity * time
-    orientation += rotation * time
+    character0.position += character0.velocity * time
+    character0.orientation += character0.rotation * time
     # Update the velocity and rotation
-    velocity += steering.linear * time
-    rotation += steering.angular * time
+    character0.velocity += steeringOutput.linear * time
+    character0.rotation += steeringOutput.angular * time
     # Check for speed above max and clip
     if velocity.length() > maxSpeed:
         velocity.normalize()
@@ -111,9 +114,10 @@ def update(steering: steeringOutput, maxSpeed: float, time: float):
 # Dynamic Flee
 class flee:
     character: character2   # Position and orientation for character
-    target: character1      # Position and orientation for target
+    
     maxAcceleration: float  # Maximum acceleration rate for character
     def getsteering() -> steeringOutput():
+        target=character1      # Position and orientation for target
         # Create output structure
         result = steeringOutput()
         # Get the direction to the target
@@ -128,9 +132,11 @@ class flee:
 # Dynamic Seek
 class seek:
     character: character3           # Position and orientation for character
-    target: character1              # Position and orientation for target
+    # target: character1              # Position and orientation for target
     maxAcceleration: float          # Maximum acceleration rate for character
+    
     def getSteering() -> steeringOutput():
+        target = character1
         # Create output strcuture
         result = steeringOutput() 
         # Get the direction to the target
@@ -151,9 +157,11 @@ class arrive:
     targetRadius: float         # Arrival radius
     slowRadius: float           # Slowing-down radius
     timeToTarget: float = 0.1   # Time over which to achieve target speed
+    
     def getSteering() -> steeringOutput:
         result = steeringOutput()
         # Get the direction and distance to the target
+        target=character1
         direction = target.position - character.position
         distance = direction.length()
         # Test for arrival
@@ -181,7 +189,8 @@ class arrive:
         return result
         
 
-class kontinue:
+class Continue:
+    character1.position = np.array([0,0])
     def getSteering():
         result = steeringOutput()
         result.linear = character1.position
@@ -196,7 +205,6 @@ time=0
 end_time=50
 timestep=0.5
 
-# Writes the data from each character with each time step
 while (time < end_time):
     with open(output_path_file, "a") as file:
         time = timestep + time
@@ -211,3 +219,4 @@ while (time < end_time):
                    str(character1.linear_x) + ',' + str(character1.linear_z) + ',' +
                    str(character1.orientation) + ',' + str(character1.steering_behavior_code) + ',' + 
                    str(character.collision_status) + ',')
+        update(character1.position,steeringOutput, time)
